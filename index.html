@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     <style>
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block; /* Забезпечити, що повідомлення займає окремий рядок */
+        }
+        input.invalid {
+            border: 2px solid red;
+        }
+    </style>
+</head>
+<body>
+     <!-- <form>
+        <div>
+            <label for="username">Ім'я користувача:</label>
+            <input type="text" id="username" name="username" placeholder="Введіть ваше ім'я">
+        </div>
+        <div>
+            <label for="email">Електронна пошта:</label>
+            <input type="email" id="email" name="email" placeholder="Введіть вашу пошту">
+        </div>
+        <div>
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" placeholder="Введіть пароль">
+        </div>
+        <div>
+            <label for="age">Вік:</label>
+            <input type="number" id="age" name="age" min="18" max="99">
+        </div>
+        <div>
+            <label for="comments">Коментарі:</label>
+            <textarea id="comments" name="comments" rows="5" cols="30" placeholder="Ваші коментарі..."></textarea>
+        </div>
+        <div>
+            <input type="checkbox" id="terms" name="terms">
+            <label for="terms">Я погоджуюся з умовами</label>
+        </div>
+        <div>
+            <button type="submit">Зареєструватися</button>
+        </div>
+    </form> -->
+
+    <form id="registrationForm" action="/submit-form" method="post" novalidate>
+        <div>
+            <label for="username">Ім'я користувача:</label>
+            <input type="text" id="username" name="username" placeholder="Введіть ваше ім'я">
+            <p id="usernameError" class="error-message"></p>
+        </div>
+        
+        <div>
+            <label for="email">Електронна пошта:</label>
+            <input type="email" id="email" name="email" placeholder="Введіть вашу пошту">
+            <p id="emailError" class="error-message"></p>
+        </div>
+        
+        <div>
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" placeholder="Введіть пароль">
+            <p id="passwordError" class="error-message"></p>
+        </div>
+
+        <div>
+            <label for="confirmPassword">Підтвердіть пароль:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Підтвердіть пароль">
+            <p id="confirmPasswordError" class="error-message"></p>
+        </div>
+        
+        <div>
+            <input type="checkbox" id="terms" name="terms">
+            <label for="terms">Я погоджуюся з умовами</label>
+            <p id="termsError" class="error-message"></p>
+        </div>
+        
+        <div>
+            <button type="submit">Зареєструватися</button>
+        </div>
+    </form>
+
+    <script>
+        const form = document.getElementById('registrationForm');
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const termsCheckbox = document.getElementById('terms');
+
+        const usernameError = document.getElementById('usernameError');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+        const termsError = document.getElementById('termsError');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Запобігти стандартній відправці форми
+            validateForm();
+        });
+
+        function validateForm() {
+            let isValid = true;
+
+            // Валідація імені користувача
+            if (usernameInput.value.trim() === '') {
+                displayError(usernameInput, usernameError, "Ім'я користувача не може бути пустим.");
+                isValid = false;
+            } else if (usernameInput.value.trim().length < 3) {
+                displayError(usernameInput, usernameError, "Ім'я користувача повинно бути не менше 3 символів.");
+                isValid = false;
+            } else {
+                clearError(usernameInput, usernameError);
+            }
+
+            // Валідація електронної пошти
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailInput.value.trim() === '') {
+                displayError(emailInput, emailError, "Електронна пошта не може бути пустою.");
+                isValid = false;
+            } else if (!emailRegex.test(emailInput.value.trim())) {
+                displayError(emailInput, emailError, "Будь ласка, введіть дійсну електронну пошту.");
+                isValid = false;
+            } else {
+                clearError(emailInput, emailError);
+            }
+
+            // Валідація пароля
+            const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+            if (passwordInput.value.trim() === '') {
+                displayError(passwordInput, passwordError, "Пароль не може бути пустим.");
+                isValid = false;
+            } else if (!passwordRegex.test(passwordInput.value.trim())) {
+                displayError(passwordInput, passwordError, "Пароль повинен містити принаймні одну велику літеру, одну малу літеру, одну цифру та бути довжиною від 8 до 20 символів.");
+                isValid = false;
+            } else {
+                clearError(passwordInput, passwordError);
+            }
+
+            // Валідація підтвердження пароля
+            if (confirmPasswordInput.value.trim() === '') {
+                displayError(confirmPasswordInput, confirmPasswordError, "Будь ласка, підтвердіть пароль.");
+                isValid = false;
+            } else if (confirmPasswordInput.value !== passwordInput.value) {
+                displayError(confirmPasswordInput, confirmPasswordError, "Паролі не співпадають.");
+                isValid = false;
+            } else {
+                clearError(confirmPasswordInput, confirmPasswordError);
+            }
+
+            // Валідація чекбокса
+            if (!termsCheckbox.checked) {
+                displayError(termsCheckbox, termsError, "Ви повинні погодитися з умовами.");
+                isValid = false;
+            } else {
+                clearError(termsCheckbox, termsError);
+            }
+
+            if (isValid) {
+                alert('Форма відправлена успішно!');
+                // Тут можна відправити форму за допомогою AJAX або просто зняти event.preventDefault()
+                form.submit(); // Відправляє форму, якщо валідація успішна
+            }
+        }
+
+        function displayError(inputElement, errorElement, message) {
+            inputElement.classList.add('invalid');
+            errorElement.textContent = message;
+        }
+
+        function clearError(inputElement, errorElement) {
+            inputElement.classList.remove('invalid');
+            errorElement.textContent = '';
+        }
+
+        // Додамо валідацію на ходу (при зміні полів)
+        usernameInput.addEventListener('input', () => {
+            if (usernameInput.value.trim().length >= 3) {
+                clearError(usernameInput, usernameError);
+            }
+        });
+        emailInput.addEventListener('input', () => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(emailInput.value.trim())) {
+                clearError(emailInput, emailError);
+            }
+        });
+        passwordInput.addEventListener('input', () => {
+            const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+            if (passwordRegex.test(passwordInput.value.trim())) {
+                clearError(passwordInput, passwordError);
+            }
+        });
+        confirmPasswordInput.addEventListener('input', () => {
+            if (confirmPasswordInput.value === passwordInput.value) {
+                clearError(confirmPasswordInput, confirmPasswordError);
+            }
+        });
+        termsCheckbox.addEventListener('change', () => {
+            if (termsCheckbox.checked) {
+                clearError(termsCheckbox, termsError);
+            }
+        });
+
+    </script>
+
+    <!-- <script>
+        const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const port = 3000;
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.post('/submit-form', (req, res) => {
+    const { username, email, password, confirmPassword, terms } = req.body;
+    const errors = {};
+
+    // Валідація імені користувача
+    if (!username || username.trim() === '') {
+        errors.username = "Ім'я користувача не може бути пустим.";
+    } else if (username.trim().length < 3) {
+        errors.username = "Ім'я користувача повинно бути не менше 3 символів.";
+    }
+
+    // Валідація електронної пошти
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || email.trim() === '') {
+        errors.email = "Електронна пошта не може бути пустою.";
+    } else if (!emailRegex.test(email.trim())) {
+        errors.email = "Будь ласка, введіть дійсну електронну пошту.";
+    }
+    // Приклад: перевірка унікальності електронної пошти в базі даних (асинхронно)
+    // if (await userExistsInDB(email)) {
+    //     errors.email = "Ця електронна пошта вже зареєстрована.";
+    // }
+
+    // Валідація пароля
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
+    if (!password || password.trim() === '') {
+        errors.password = "Пароль не може бути пустим.";
+    } else if (!passwordRegex.test(password.trim())) {
+        errors.password = "Пароль повинен містити принаймні одну велику літеру, одну малу літеру, одну цифру та бути довжиною від 8 до 20 символів.";
+    }
+
+    // Валідація підтвердження пароля
+    if (!confirmPassword || confirmPassword.trim() === '') {
+        errors.confirmPassword = "Будь ласка, підтвердіть пароль.";
+    } else if (confirmPassword !== password) {
+        errors.confirmPassword = "Паролі не співпадають.";
+    }
+
+    // Валідація чекбокса
+    if (!terms) {
+        errors.terms = "Ви повинні погодитися з умовами.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+        // Є помилки, відправити їх назад клієнту
+        return res.status(400).json({ success: false, errors });
+    } else {
+        // Дані валідні, обробити їх
+        console.log('Дані форми отримано:', { username, email, password, terms });
+        // Тут може бути логіка збереження в базу даних, відправка листів тощо.
+        res.status(200).json({ success: true, message: 'Форма успішно відправлена!' });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Сервер запущено на http://localhost:${port}`);
+});
+    </script> -->
+</body>
+</html>
